@@ -2,6 +2,8 @@ import pygame
 import sys
 from configuration import ScreenSettings
 from zombie import Zombie
+from gun import Gun
+from ammo import Ammo
 
 class Game:
     """Initialize the Zombie game."""
@@ -21,12 +23,16 @@ class Game:
         pygame.display.set_caption("I'm a Zombieee, i'll bite you...")
 
         self.zombie = Zombie(self)
+        self.gun = Gun(self)
+        self.ammos = pygame.sprite.Group() # ammo is uncountable, but...
 
     def run_game(self):
         """Initialize the game."""
         while True:
             self._check_events()
             self.zombie.update()
+            self.gun.update(self.zombie.rect)
+            self._update_ammos()
             self._update_screen()
             self.clock.tick(60)
 
@@ -37,11 +43,11 @@ class Game:
                 sys.exit()
             
             # Move the Zombie 
-            elif event.type == pygame.KEYUP:
+            elif event.type == pygame.KEYDOWN:
                 self._check_presses_event(event)
 
             # Stop moving the Zombie
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYUP:
                 self._check_releases_event(event)
 
     def _check_presses_event(self, event):
@@ -51,11 +57,13 @@ class Game:
         elif event.key == pygame.K_LEFT:
             self.zombie.moving_left = True
         elif event.key == pygame.K_UP:
-            self.zombie.moving_up =True
+            self.zombie.moving_up = True
         elif event.key == pygame.K_DOWN:
             self.zombie.moving_down = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self._fire_ammo()
 
     def _check_releases_event(self, event):
         """Respond to key releases."""
@@ -68,10 +76,30 @@ class Game:
         elif event.key == pygame.K_DOWN:
             self.zombie.moving_down = False
 
+    def _fire_ammo(self):
+        """Create a new ammo and add it to the ammos group."""
+        if len(self.ammos) < self.settings.ammo_alowed:
+            new_ammo = Ammo(self)
+            self.ammos.add(new_ammo)
+
+    def _update_ammos(self):
+        """Update position of ammos and get rid of old ammos."""
+        # Update ammo positions
+        self.ammos.update()
+
+        # Get rid of ammos that have dissapeared.
+        for ammo in self.ammos.copy():
+            if ammo.rect.left > self.screen.get_rect().right:
+                self.ammos.remove(ammo) 
+
     def _update_screen(self):
         """Update the image"""
         self.screen.fill(self.settings.bg_screen)
+        for ammo in self.ammos.sprites():
+            ammo.draw_ammo()
+
         self.zombie.blitme()
+        self.gun.blit_gun()
 
         pygame.display.flip()
 

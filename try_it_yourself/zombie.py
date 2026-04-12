@@ -9,10 +9,13 @@ class Zombie:
 
         # Load the image and gets its rect
         self.image = pygame.image.load("try_it_yourself/bmpfiles/Zombie.bmp")
+        self.image.set_colorkey((255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (80, 80))
+
         self.rect = self.image.get_rect()
 
         # Start each new Zombie at the bottom center of the screen
-        self.rect.midbottom = self.screen_rect.midbottom
+        self.rect.midleft = self.screen_rect.midleft
 
         # Stores a float for the zombie's exact horizontal and vertical position.
         self.x = float(self.rect.x)
@@ -26,13 +29,13 @@ class Zombie:
 
     def update(self):
         if self.moving_right and self.rect.right < self.screen_rect.right:
-            self.x -= self.settings.zombie_speed
-        if self.moving_left and self.rect.left > 0:
             self.x += self.settings.zombie_speed
-        if self.moving_up and self.rect.top < 0:
-            self.y += self.settings.zombie_speed
-        if self.moving_down and self.rect.bottom > self.screen_rect.bottom:
+        if self.moving_left and self.rect.left > 0:
+            self.x -= self.settings.zombie_speed
+        if self.moving_up and self.rect.top > 0:
             self.y -= self.settings.zombie_speed
+        if self.moving_down and self.rect.bottom < self.screen_rect.bottom:
+            self.y += self.settings.zombie_speed
 
         # Update rect object from self.x and self.y.
         self.rect.x = self.x

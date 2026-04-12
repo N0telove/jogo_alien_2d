@@ -9,3 +9,10 @@ class ScreenSettings:
         self.screen_height = 800
         self.bg_screen = (220, 220, 220)
         self.zombie_speed = 2.5
+
+        # Ammo settings
+        self.ammo_speed = 3.0
+        self.ammo_width = 10
+        self.ammo_height = 3
+        self.ammo_color = (60, 60, 60)
+        self.ammo_alowed = 5
