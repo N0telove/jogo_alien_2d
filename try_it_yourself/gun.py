@@ -10,7 +10,7 @@ class Gun(Sprite):
         self.screen = ai_game.screen
 
         # Load the image and make some adjustments
-        self.image = pygame.image.load(r"C:\Users\Asus\Desktop\codigos\jogo_alien\jogo_alien_2d\try_it_yourself\bmpfiles\ak-47-gun.bmp")
+        self.image = pygame.image.load(r"C:\Users\rh.agriter\Desktop\eu\codigos\python_crash_course\jogo_alien_2d\try_it_yourself\bmpfiles\ak-47-gun.bmp")
         self.image.set_colorkey((255, 255, 255))
         self.image = pygame.transform.scale(self.image, (60, 60))
 
