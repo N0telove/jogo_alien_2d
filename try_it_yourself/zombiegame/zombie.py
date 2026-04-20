@@ -8,7 +8,7 @@ class Zombie:
         self.settings = ai_game.settings
 
         # Load the image and gets its rect
-        self.image = pygame.image.load("try_it_yourself/bmpfiles/Zombie.bmp")
+        self.image = pygame.image.load("try_it_yourself/zombiegame/bmpfiles/Zombie.bmp")
         self.image.set_colorkey((255, 255, 255))
         self.image = pygame.transform.scale(self.image, (80, 80))
 
