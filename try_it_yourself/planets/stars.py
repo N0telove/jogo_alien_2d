@@ -2,6 +2,7 @@ import pygame
 from pygame.sprite import Sprite
 import sys
 from random import randint
+from pathlib import Path
 
 
 class Sky():
@@ -86,7 +87,7 @@ class Stars(Sprite):
         super().__init__()
         self.screen = sky_game.screen
 
-        self.image = pygame.image.load(r"C:\Users\Asus\Desktop\codigos\jogo_alien\jogo_alien_2d\try_it_yourself\planets\Frames\earth1.bmp")
+        self.image = pygame.image.load(Path().cwd() / Path("try_it_yourself/planets/Frames/earth1.bmp"))
         self.image.set_colorkey((255, 255, 255))
         self.image = pygame.transform.scale(self.image, (90, 90))
 
