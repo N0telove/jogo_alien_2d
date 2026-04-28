@@ -52,13 +52,12 @@ class FireDrop:
         self.drops.add(new_drop)
 
     def _check_drops_edges(self):
-        self.drops.update()
         for drop in self.drops.sprites():
             if drop.check_edges():
                 drop.rect.y = randint(-100, -40)
                 drop.y = float(drop.rect.y)
                 drop.rect.x = randint(0, self.settings.screen_width)
-                self.drop.wind_speed *= -1
+                drop.wind_speed *= -1
                 
     
 
@@ -84,21 +83,22 @@ class Drops(Sprite):
         self.rect.x = self.rect.width
         self.rect.y = self.rect.height
 
-        self.speed = drop_game.settings.drop_speed + randint(0, 2)
+        self.speed = drop_game.settings.drop_speed + randint(0, 8)
+        self.wind_speed = self.settings.wind_speed
         self.y = float(self.rect.y)
+        self.x = float(self.rect.x)
 
 
     def check_edges(self):
         """Return True if alien is at the bottom edge of screen."""
         screen_rect = self.screen.get_rect()
-        return (self.rect.top >= screen_rect.height) or (self.rect.right >= screen_rect.width)
+        return (self.rect.top >= screen_rect.height) or (self.rect.right >= screen_rect.width) or (self.rect.left <= 0)
         
     def update(self):
         """Move the alien down."""
         self.y += self.speed
         self.rect.y = self.y
-
-        self.rect.x += self.settings.wind_speed
+        self.rect.x += self.wind_speed
 
 
 class Configuration3:
