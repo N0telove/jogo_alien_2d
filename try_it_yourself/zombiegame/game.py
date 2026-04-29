@@ -4,6 +4,7 @@ from configuration import ScreenSettings
 from zombie import Zombie
 from gun import Gun
 from ammo import Ammo
+from vampire import Vampire
 
 class Game:
     """Initialize the Zombie game."""
@@ -25,6 +26,9 @@ class Game:
         self.zombie = Zombie(self)
         self.gun = Gun(self)
         self.ammos = pygame.sprite.Group() # ammo is uncountable, but...
+        self.vampires = pygame.sprite.Group()
+
+        self._create_coven()
 
     def run_game(self):
         """Initialize the game."""
@@ -33,6 +37,7 @@ class Game:
             self.zombie.update()
             self.gun.update(self.zombie.rect)
             self._update_ammos()
+            self._update_vampires()
             self._update_screen()
             self.clock.tick(60)
 
@@ -90,7 +95,66 @@ class Game:
         # Get rid of ammos that have dissapeared.
         for ammo in self.ammos.copy():
             if ammo.rect.left > self.screen.get_rect().right:
-                self.ammos.remove(ammo) 
+                self.ammos.remove(ammo)
+
+        self._check_ammo_vampire_collisions()
+
+    def _check_ammo_vampire_collisions(self):
+        """Respond to ammo-alien collisions."""
+        # Remove any ammo and vampire that have collided.
+        collisions = pygame.sprite.groupcollide(
+            self.ammos, self.vampires, False, True
+        )
+
+        if not self.vampires:
+            # Destroy existing ammos and create new coven.
+            self.ammos.empty()
+            self._create_coven()
+
+    def _update_vampires(self):
+        """Check if the coven is an edge, than update positions."""
+        self._check_coven_edges()
+        self.vampires.update()
+
+    def _create_coven(self):
+        """Create the coven of vampires."""
+        # Create a vampire and keep adding vampires until there's no room left.
+        # Spacing between vampires is one vampire width and height.;
+
+        vampire = Vampire(self)
+        vampire_width, vampire_height = vampire.rect.size
+
+        current_x, current_y = vampire_width, vampire_height
+        while current_y < (self.settings.screen_height - 5 * vampire_height):
+            while current_x < (self.settings.screen_width - 2 * vampire_height):
+                self._create_vampire(current_x, current_y)
+                current_x += 2 * vampire_width
+
+            # Finished a row; reset x value, and increment y value.
+            current_x = vampire_width
+            current_y += 2 * vampire_height
+
+    def _create_vampire(self, x_position, y_position):
+        """Create a vampire and place it in the coven."""
+        new_vampire = Vampire(self)
+        new_vampire.x = x_position
+        new_vampire.rect.x = x_position
+        new_vampire.rect.y = y_position
+        self.vampires.add(new_vampire)
+
+    def _check_coven_edges(self):
+        """Respond appropriately if any vampires have reached an edge."""
+        for vampire in self.vampires.sprites():
+            if vampire.check_edges():
+                self._change_coven_direction()
+                break
+
+    def _change_coven_direction(self):
+        """Change the coven's direction."""
+        # for vampire in self.vampires.sprites():
+        #     vampire.rect.y += self.settings.coven_drop_speed
+        self.settings.coven_direction *= -1
+
 
     def _update_screen(self):
         """Update the image"""
@@ -100,6 +164,7 @@ class Game:
 
         self.zombie.blitme()
         self.gun.blit_gun()
+        self.vampires.draw(self.screen)
 
         pygame.display.flip()
 
