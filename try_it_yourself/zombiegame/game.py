@@ -5,6 +5,7 @@ from zombie import Zombie
 from gun import Gun
 from ammo import Ammo
 from vampire import Vampire
+from random import randint
 
 class Game:
     """Initialize the Zombie game."""
@@ -112,48 +113,52 @@ class Game:
             self._create_coven()
 
     def _update_vampires(self):
-        """Check if the coven is an edge, than update positions."""
-        self._check_coven_edges()
+        """Update positions of vampires and check collisions."""
         self.vampires.update()
+        self._check_vampire_collisions()
 
     def _create_coven(self):
-        """Create the coven of vampires."""
-        # Create a vampire and keep adding vampires until there's no room left.
-        # Spacing between vampires is one vampire width and height.;
-
+        """Create a group of vampires with random positions."""
         vampire = Vampire(self)
         vampire_width, vampire_height = vampire.rect.size
 
-        current_x, current_y = vampire_width, vampire_height
-        while current_y < (self.settings.screen_height - 5 * vampire_height):
-            while current_x < (self.settings.screen_width - 2 * vampire_height):
-                self._create_vampire(current_x, current_y)
-                current_x += 2 * vampire_width
-
-            # Finished a row; reset x value, and increment y value.
-            current_x = vampire_width
-            current_y += 2 * vampire_height
+        # Create vampires in random positions across the right side of screen
+        for _ in range(15):  # Create 15 vampires
+            x_pos = randint(self.settings.screen_width - 200, self.settings.screen_width - vampire_width - 10)
+            y_pos = randint(vampire_height, self.settings.screen_height - vampire_height - 10)
+            self._create_vampire(x_pos, y_pos)
 
     def _create_vampire(self, x_position, y_position):
         """Create a vampire and place it in the coven."""
         new_vampire = Vampire(self)
         new_vampire.x = x_position
         new_vampire.rect.x = x_position
+        new_vampire.y = y_position
         new_vampire.rect.y = y_position
         self.vampires.add(new_vampire)
 
-    def _check_coven_edges(self):
-        """Respond appropriately if any vampires have reached an edge."""
-        for vampire in self.vampires.sprites():
-            if vampire.check_edges():
-                self._change_coven_direction()
-                break
-
-    def _change_coven_direction(self):
-        """Change the coven's direction."""
-        # for vampire in self.vampires.sprites():
-        #     vampire.rect.y += self.settings.coven_drop_speed
-        self.settings.coven_direction *= -1
+    def _check_vampire_collisions(self):
+        """Check and resolve collisions between vampires."""
+        vampires_list = self.vampires.sprites()
+        
+        for i, vampire in enumerate(vampires_list):
+            for other_vampire in vampires_list[i + 1:]:
+                if vampire.rect.colliderect(other_vampire.rect):
+                    # Reverse directions when colliding
+                    vampire.vertical_direction *= -1
+                    other_vampire.vertical_direction *= -1
+                    
+                    # Move apart to prevent sticking
+                    if vampire.rect.top < other_vampire.rect.top:
+                        vampire.rect.y -= 5
+                        other_vampire.rect.y += 5
+                    else:
+                        vampire.rect.y += 5
+                        other_vampire.rect.y -= 5
+                    
+                    # Update y positions
+                    vampire.y = float(vampire.rect.y)
+                    other_vampire.y = float(other_vampire.rect.y)
 
 
     def _update_screen(self):

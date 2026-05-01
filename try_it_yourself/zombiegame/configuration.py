@@ -18,7 +18,6 @@ class ScreenSettings:
         self.ammo_alowed = 5
 
         # Vampire settings
-        self.vampire_speed = 1.0
-        self.coven_drop_speed = 10
+        self.vampire_speed = 0.5
         # coven direction of 1 represents right; -1 represents left.
-        self.coven_direction = 1
+        self.coven_direction = -1
