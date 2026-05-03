@@ -41,6 +41,12 @@ class Zombie:
         self.rect.x = self.x
         self.rect.y = self.y
 
+    def position_zombie(self):
+        """Position the zombie on the screen."""
+        self.rect.midleft = self.screen_rect.midleft
+        self.x = float(self.rect.x)
+
+
     def blitme(self):
         """Draw the Zombie at his current location."""
         self.screen.blit(self.image, self.rect)

@@ -1,11 +1,16 @@
-import pygame
 import sys
+from time import sleep
+from random import randint
+
+import pygame
+
 from configuration import ScreenSettings
 from zombie import Zombie
 from gun import Gun
 from ammo import Ammo
 from vampire import Vampire
-from random import randint
+from stats import Stats
+from counter_kill import CounterKill
 
 class Game:
     """Initialize the Zombie game."""
@@ -22,39 +27,48 @@ class Game:
             self.settings.screen_height = self.screen.get_rect().height
         self.clock = pygame.time.Clock()
 
+
         pygame.display.set_caption("I'm a Zombieee, i'll bite you...")
 
         self.zombie = Zombie(self)
         self.gun = Gun(self)
         self.ammos = pygame.sprite.Group() # ammo is uncountable, but...
         self.vampires = pygame.sprite.Group()
+        self.stats = Stats(self) # Instance of statistics.
+        self.counter = CounterKill(self)
 
         self._create_coven()
+
+        # Start the game in an active state.
+        self.game_active = True
 
     def run_game(self):
         """Initialize the game."""
         while True:
             self._check_events()
-            self.zombie.update()
-            self.gun.update(self.zombie.rect)
-            self._update_ammos()
-            self._update_vampires()
+            if self.game_active:
+                self.zombie.update()
+                self.gun.update(self.zombie.rect)
+                self._update_ammos()
+                self._update_vampires()
+            
             self._update_screen()
             self.clock.tick(60)
 
     def _check_events(self):
         """Respond to keypresses and mouse events."""
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
                 sys.exit()
             
-            # Move the Zombie 
-            elif event.type == pygame.KEYDOWN:
-                self._check_presses_event(event)
+            if self.game_active:
+                # Move the Zombie 
+                if event.type == pygame.KEYDOWN:
+                    self._check_presses_event(event)
 
-            # Stop moving the Zombie
-            elif event.type == pygame.KEYUP:
-                self._check_releases_event(event)
+                # Stop moving the Zombie
+                elif event.type == pygame.KEYUP:
+                    self._check_releases_event(event)
 
     def _check_presses_event(self, event):
         """Respond to keypresses."""
@@ -66,8 +80,6 @@ class Game:
             self.zombie.moving_up = True
         elif event.key == pygame.K_DOWN:
             self.zombie.moving_down = True
-        elif event.key == pygame.K_q:
-            sys.exit()
         elif event.key == pygame.K_SPACE:
             self._fire_ammo()
 
@@ -106,6 +118,8 @@ class Game:
         collisions = pygame.sprite.groupcollide(
             self.ammos, self.vampires, False, True
         )
+        if collisions:
+            self.settings.eliminate_sprites += 1
 
         if not self.vampires:
             # Destroy existing ammos and create new coven.
@@ -116,6 +130,13 @@ class Game:
         """Update positions of vampires and check collisions."""
         self.vampires.update()
         self._check_vampire_collisions()
+
+        # Look for vampires-zombie collisions.
+        if pygame.sprite.spritecollideany(self.zombie, self.vampires):
+            self._zombie_hit()
+
+        # Look for vampires hitting the left edge of the screen.
+        self._check_vampire_left()
 
     def _create_coven(self):
         """Create a group of vampires with random positions."""
@@ -160,6 +181,34 @@ class Game:
                     vampire.y = float(vampire.rect.y)
                     other_vampire.y = float(other_vampire.rect.y)
 
+    def _check_vampire_left(self):
+        """Check if any vampire have reached the left edge of the screen."""
+        for vampire in self.vampires.sprites():
+            if vampire.rect.left <= 0:
+                # Treat this the same as if the zombie got bite.
+                self._zombie_hit()
+                break
+
+    def _zombie_hit(self):
+        """Respond to the zombie being bite by a vampire."""
+        if self.stats.zombies_left > 0:
+            
+            # Decrement zombies left.
+            self.stats.zombies_left -= 1
+
+            # Get rid of any remaining ammo and vampires.
+            self.ammos.empty()
+            self.vampires.empty()
+
+            # Create a new coven and position the new zombie.
+            self._create_coven()
+            self.zombie.position_zombie()
+
+            # Pause
+            sleep(0.5)
+        else:
+            self.game_active = False
+
 
     def _update_screen(self):
         """Update the image"""
@@ -170,6 +219,7 @@ class Game:
         self.zombie.blitme()
         self.gun.blit_gun()
         self.vampires.draw(self.screen)
+        self.counter.draw_counter()
 
         pygame.display.flip()
 

@@ -8,7 +8,10 @@ class ScreenSettings:
         self.screen_width = 1200
         self.screen_height = 800
         self.bg_screen = (220, 220, 220)
+
+        # Zombie settings
         self.zombie_speed = 2.5
+        self.zombie_limit = 1
 
         # Ammo settings
         self.ammo_speed = 3.0
@@ -18,6 +21,9 @@ class ScreenSettings:
         self.ammo_alowed = 5
 
         # Vampire settings
-        self.vampire_speed = 0.5
+        self.vampire_speed = 1.0
         # coven direction of 1 represents right; -1 represents left.
         self.coven_direction = -1
+
+        # Counter kills settings
+        self.eliminate_sprites = 0
