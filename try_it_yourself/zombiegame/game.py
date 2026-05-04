@@ -204,6 +204,9 @@ class Game:
             self._create_coven()
             self.zombie.position_zombie()
 
+            # Update lives counter
+            self.counter.render_life()
+
             # Pause
             sleep(0.5)
         else:
