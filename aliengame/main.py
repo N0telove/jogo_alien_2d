@@ -52,9 +52,15 @@ class AlienInvasion:
 
         # Start Alien Invasion in an inactive state.
         self.game_active = False
+        # Make a first play state
+        self.first_play = False
+        pygame.mouse.set_visible(False)
 
         # Make the Play button.
         self.play_button = Button(self, "Play")
+
+
+
 
     def run_game(self):
         """Start the main loop for the game."""
@@ -82,14 +88,14 @@ class AlienInvasion:
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.first_play:
                 mouse_pos = pygame.mouse.get_pos()
                 self._check_play_button(mouse_pos)
 
-    def _check_play_button(self, mouse_pos):
+    def _check_play_button(self, mouse_pos=(0,)):
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         """Start a new game when the player clicks Play."""
-        if button_clicked and not self.game_active:
+        if button_clicked and not self.game_active: 
             # Reset the game statistics.
             self.stats.reset_stats()
             self.game_active = True
@@ -113,6 +119,9 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_p and not self.first_play:
+            self.first_play = True
+            self.game_active = True
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
     
@@ -246,7 +255,7 @@ class AlienInvasion:
         self.aliens.draw(self.screen)
 
         # Draw the play button if the game is inactive,
-        if not self.game_active:
+        if not self.game_active and self.first_play:
             self.play_button.draw_button()
 
         pygame.display.flip()            
