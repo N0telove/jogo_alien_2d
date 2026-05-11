@@ -29,7 +29,7 @@ class CounterKill:
 
 
         # now draws <p>: kills (changes constantly)
-        text_kill = f"Kills: {self.settings.eliminate_sprites}"
+        text_kill = f"Kills: {self.stats.eliminate_sprites}"
         kill_surf = self.font.render(text_kill, True, self.text_color)
         kill_rect = kill_surf.get_rect()
 
