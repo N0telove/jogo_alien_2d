@@ -53,11 +53,17 @@ class AlienInvasion:
         # Start Alien Invasion in an inactive state.
         self.game_active = False
         # Make a first play state
-        self.first_play = False
+        self.first_play = True
         pygame.mouse.set_visible(False)
 
         # Make the Play button.
-        self.play_button = Button(self, "Play")
+        self.play_button = Button(self, "Play", (0, 135, 0), self.screen.get_rect().center, (200, 50), self._play_button)
+
+        # Make the config button.
+        self.config_button = Button(self, "Settings", (0, 0, 100), (200, 400), (250, 100), self._settings_button)
+        self.config = False
+        self.create_instance = False
+        self.button_state = None
 
 
 
@@ -88,14 +94,32 @@ class AlienInvasion:
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
 
-            elif event.type == pygame.MOUSEBUTTONDOWN and self.first_play:
+            elif event.type == pygame.MOUSEBUTTONDOWN and not self.game_active:
                 mouse_pos = pygame.mouse.get_pos()
-                self._check_play_button(mouse_pos)
+                self._check_collide(mouse_pos)
 
-    def _check_play_button(self, mouse_pos=(0,)):
-        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+    def _check_collide(self, mouse_pos):
+        if self.play_button.rect.collidepoint(mouse_pos) and not self.first_play:
+            self.play_button.action()
+        
+        elif self.config_button.rect.collidepoint(mouse_pos):
+            self.config_button.action()
+            self._create_settings_button()    
+
+        elif self.config:
+            buttons = [self.alien_speed_button,
+                    self.ship_speed_button, self.bullets_alowed_button]
+            for button in buttons:
+                if button.rect.collidepoint(mouse_pos):
+                    button.action()
+                    break
+            
+
+
+
+    def _play_button(self):
         """Start a new game when the player clicks Play."""
-        if button_clicked and not self.game_active: 
+        if not self.game_active: 
             # Reset the game statistics.
             self.stats.reset_stats()
             self.game_active = True
@@ -110,6 +134,34 @@ class AlienInvasion:
             # Hide the mouse cursor.
             pygame.mouse.set_visible(False)
 
+    def _settings_button(self):
+        """Open settings when the player clicks the button.."""
+        if not self.game_active and not self.create_instance:
+            self.alien_speed_button = Button(self, "Zombie Speed", (0, 0, 100), (200, 100), (250, 100), self._alien_speed)
+            self.input_alien_speed =  Button(self, f"Speed: {self.settings.alien_speed}", (0, 0, 0), (200, 200), (180, 80))
+
+            self.ship_speed_button = Button(self, "Ship Speed", (0, 0, 100), (200, 310), (250, 100), self._ship_speed)
+            self.input_ship_speed = Button(self, f"Speed: {self.settings.ship_speed}", (0, 0, 0), (200, 440), (180, 80))
+
+            self.bullets_alowed_button = Button(self, "Bullets Alowed", (0, 0, 100), (200, 560), (250, 100), self._bullets_alowed)  
+            self.input_bullets_alowed = Button(self, f"Bullets: {self.settings.bullets_alowed}", (0, 0, 0), (200, 670), (180, 80))
+
+            self.create_instance = True
+        self.config = True
+
+    def _create_settings_button(self):
+        self.alien_speed_button.draw_button()
+        self.ship_speed_button.draw_button()
+        self.bullets_alowed_button.draw_button()
+
+    def _alien_speed(self):
+        self.button_state = self.input_alien_speed.draw_button
+
+    def _ship_speed(self):
+        self.button_state = self.input_ship_speed.draw_button
+
+    def _bullets_alowed(self):
+        self.button_state = self.input_bullets_alowed.draw_button
                     
     def _check_keydown_events(self, event):
         """Respond to keypresses."""
@@ -119,8 +171,9 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
-        elif event.key == pygame.K_p and not self.first_play:
-            self.first_play = True
+        elif event.key == pygame.K_p and self.first_play:
+            pygame.mouse.set_visible(False)
+            self.first_play = False
             self.game_active = True
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
@@ -243,21 +296,30 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.game_active = False
+            self.config = False
             pygame.mouse.set_visible(True)
 
 
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
+        # Draw the play button if the game is inactive,
         self.screen.fill(self.settings.bg_color)
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.ship.blitme()
         self.aliens.draw(self.screen)
 
-        # Draw the play button if the game is inactive,
-        if not self.game_active and self.first_play:
-            self.play_button.draw_button()
-
+        if not self.game_active:
+            pygame.mouse.set_visible(True)
+            if not self.config:
+                self.config_button.draw_button()
+            else:
+                self._create_settings_button()
+                if self.button_state:
+                    self.button_state()
+            if not self.first_play:
+                self.play_button.draw_button()
+                    
         pygame.display.flip()            
 
 if __name__ == "__main__":
