@@ -10,15 +10,20 @@ class Gun(Sprite):
         super().__init__()
         self.screen = ai_game.screen
 
-        # Load the image and make some adjustments
-        #self.image = pygame.image.load(r"C:\Users\rh.agriter\Desktop\eu\codigos\python_crash_course\jogo_alien_2d\try_it_yourself\bmpfiles\ak-47-gun.bmp")
-        self.image = pygame.image.load(Path().cwd() / Path("try_it_yourself/zombiegame/bmpfiles/ak-47-gun.bmp"))
+        # Instance zombie
+        self.zombie = ai_game.zombie
 
+        # Load the image and make some adjustments
+        self.image = pygame.image.load(Path().cwd() / Path("try_it_yourself/zombiegame/bmpfiles/ak-47-gun.bmp"))
         self.image.set_colorkey((255, 255, 255))
         self.image = pygame.transform.scale(self.image, (60, 60))
 
         # Get the image shape
         self.rect = self.image.get_rect()
+
+        # update initial position
+        self.rect.centerx = self.zombie.rect.centerx + 21
+        self.rect.centery = self.zombie.rect.centery + 17
 
     def update(self, pos_zombie):
         # Set the X and Y distance from zombie's hand

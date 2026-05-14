@@ -11,6 +11,7 @@ from ammo import Ammo
 from vampire import Vampire
 from stats import Stats
 from counter_kill import CounterKill
+from keys import Button
 
 class Game:
     """Initialize the Zombie game."""
@@ -40,15 +41,24 @@ class Game:
         self._create_coven()
 
         # Start the game in an active state.
-        self.game_active = True
+        self.game_active = False
+        # Make a first play state
+        self.first_play = False
+        pygame.mouse.set_visible(False)
+
+        # Make the Play button
+        self.play_button = Button(self, "Play")
 
     def run_game(self):
         """Initialize the game."""
         while True:
+            
+            # A arma é atualizada para a posição do zumbi
+            self.gun.update(self.zombie.rect)
+
             self._check_events()
             if self.game_active:
                 self.zombie.update()
-                self.gun.update(self.zombie.rect)
                 self._update_ammos()
                 self._update_vampires()
             
@@ -58,21 +68,49 @@ class Game:
     def _check_events(self):
         """Respond to keypresses and mouse events."""
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
+            if event.type == pygame.QUIT:
                 sys.exit()
             
-            if self.game_active:
-                # Move the Zombie 
-                if event.type == pygame.KEYDOWN:
+            # Move the Zombie 
+            elif event.type == pygame.KEYDOWN:
                     self._check_presses_event(event)
 
-                # Stop moving the Zombie
-                elif event.type == pygame.KEYUP:
-                    self._check_releases_event(event)
+            # Stop moving the Zombie
+            elif event.type == pygame.KEYUP:
+                self._check_releases_event(event)
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.first_play:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
+
+    def _check_play_button(self, mouse_pos=(0,)):
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        """Start a new game when the player clicks Play."""
+        if button_clicked and not self.game_active: 
+            # Reset the game statistics and settings.
+            self.settings.initialize_dynamic_settings()
+            self.stats.reset_stats()
+
+            self.game_active = True
+            # Get rid of any remaining bullets and aliens.
+            self.ammos.empty()
+            self.vampires.empty()
+
+            # Create a new fleet and center the ship.
+            self._create_coven()
+            self.zombie.position_zombie()
+
+            # Hide the mouse cursor.
+            pygame.mouse.set_visible(False)
 
     def _check_presses_event(self, event):
         """Respond to keypresses."""
-        if event.key == pygame.K_RIGHT:
+        if event.key == pygame.K_q:
+            sys.exit()
+        elif event.key == pygame.K_p and not self.first_play:
+            self.first_play = True
+            self.game_active = True
+        elif event.key == pygame.K_RIGHT:
             self.zombie.moving_right = True
         elif event.key == pygame.K_LEFT:
             self.zombie.moving_left = True
@@ -81,7 +119,8 @@ class Game:
         elif event.key == pygame.K_DOWN:
             self.zombie.moving_down = True
         elif event.key == pygame.K_SPACE:
-            self._fire_ammo()
+            if self.game_active:
+                self._fire_ammo()
 
     def _check_releases_event(self, event):
         """Respond to key releases."""
@@ -116,10 +155,11 @@ class Game:
         """Respond to ammo-alien collisions."""
         # Remove any ammo and vampire that have collided.
         collisions = pygame.sprite.groupcollide(
-            self.ammos, self.vampires, False, True
+            self.ammos, self.vampires, True, True
         )
         if collisions:
-            self.settings.eliminate_sprites += 1
+            self.settings.increase_speed()
+            self.stats.eliminate_sprites += 1
 
         if not self.vampires:
             # Destroy existing ammos and create new coven.
@@ -197,7 +237,7 @@ class Game:
             self.stats.zombies_left -= 1
 
             # Get rid of any remaining ammo and vampires.
-            self.ammos.empty()
+            
             self.vampires.empty()
 
             # Create a new coven and position the new zombie.
@@ -207,10 +247,16 @@ class Game:
             # Update lives counter
             self.counter.render_life()
 
+            # Restart the game's speed
+            self.settings.initialize_dynamic_settings()
+
+            self.ammos.empty()
+
             # Pause
             sleep(0.5)
         else:
             self.game_active = False
+            pygame.mouse.set_visible(True)
 
 
     def _update_screen(self):
@@ -223,6 +269,10 @@ class Game:
         self.gun.blit_gun()
         self.vampires.draw(self.screen)
         self.counter.draw_counter()
+
+        # Draw the play button if the game is inactive,
+        if not self.game_active and self.first_play:
+            self.play_button.draw_button()
 
         pygame.display.flip()
 
