@@ -65,7 +65,8 @@ class AlienInvasion:
         self.config_button = Button(self, "Settings", (0, 0, 100), (200, 400), (250, 100), self._settings_button)
         self.config = False
         self.create_instance = False
-        self.button_state = None
+        self.label_state = None
+        self.input_state = None
 
 
 
@@ -98,7 +99,7 @@ class AlienInvasion:
 
             elif event.type == pygame.MOUSEBUTTONDOWN and not self.game_active:
                 mouse_pos = pygame.mouse.get_pos()
-                if self.button_state:
+                if self.label_state:
                     input_box = [self.input_bullets_alowed, self.input_ship_speed,
                         self.input_alien_speed]
                     for item in input_box:
@@ -115,11 +116,15 @@ class AlienInvasion:
             self._create_settings_button()    
 
         elif self.config:
-            buttons = [self.alien_speed_button,
-                    self.ship_speed_button, self.bullets_alowed_button]
-            for button in buttons:
+            buttons = {self.alien_speed_button: [self.alien_label, self.input_alien_speed],
+                    self.ship_speed_button: [self.ship_label, self.input_ship_speed],
+                    self.bullets_alowed_button: [self.bullets_label, self.input_bullets_alowed]}
+            for button in buttons.keys():
                 if button.rect.collidepoint(mouse_pos):
-                    button.action()
+                    label = buttons[button][0]
+                    input_box = buttons[button][1]
+                    self.label_state = label.draw_label
+                    self.input_state = input_box.draw_input
                     break
 
 
@@ -143,17 +148,17 @@ class AlienInvasion:
     def _settings_button(self):
         """Open settings when the player clicks the button.."""
         if not self.game_active and not self.create_instance:
-            self.alien_speed_button = Button(self, "Alien Speed", (0, 0, 0), (200, 100), (250, 100), self._alien_speed)
+            self.alien_speed_button = Button(self, "Alien Speed", (0, 0, 0), (200, 100), (250, 100))
             self.alien_label = Label(self, "Speed", (200, 200))
-            self.input_alien_speed =  InputBox(self, f"{self.settings.alien_speed}", (self.alien_label.msg_image_rect.right + 10, 200), (180, 80))
+            self.input_alien_speed =  InputBox(self, f"{self.settings.alien_speed}", (self.alien_label.msg_image_rect.right + 10, self.alien_label.msg_image_rect.centery), (180, 80))
 
-            self.ship_speed_button = Button(self, "Ship Speed", (0, 0, 0), (200, 310), (250, 100), self._ship_speed)
+            self.ship_speed_button = Button(self, "Ship Speed", (0, 0, 0), (200, 310), (250, 100))
             self.ship_label = Label(self, "Speed", (200, 430))
-            self.input_ship_speed = InputBox(self, f"{self.settings.ship_speed}", (self.ship_label.msg_image_rect.right + 10, 430), (180, 80))
+            self.input_ship_speed = InputBox(self, f"{self.settings.ship_speed}", (self.ship_label.msg_image_rect.right + 10, self.ship_label.msg_image_rect.centery), (180, 80))
 
-            self.bullets_alowed_button = Button(self, "Bullets Alowed", (0, 0, 0), (200, 560), (250, 100), self._bullets_alowed)  
+            self.bullets_alowed_button = Button(self, "Bullets Alowed", (0, 0, 0), (200, 560), (250, 100))  
             self.bullets_label = Label(self, "Bullets", (200, 670))
-            self.input_bullets_alowed = InputBox(self, f"{self.settings.bullets_alowed}", (self.bullets_label.msg_image_rect.right + 10, 670), (180, 80))
+            self.input_bullets_alowed = InputBox(self, f"{self.settings.bullets_alowed}", (self.bullets_label.msg_image_rect.right + 10, self.bullets_label.msg_image_rect.centery), (180, 80))
 
             self.create_instance = True
         self.config = True
@@ -161,18 +166,7 @@ class AlienInvasion:
     def _create_settings_button(self):
         self.alien_speed_button.draw_button()
         self.ship_speed_button.draw_button()
-        self.bullets_alowed_button.draw_button()
-
-    def _alien_speed(self):
-        self.button_state = self.input_alien_speed.draw_input
-        # Referência o método e deixa para o _update chamar
-
-    def _ship_speed(self):
-        self.button_state = self.input_ship_speed.draw_input
-
-    def _bullets_alowed(self):
-        self.button_state = self.input_bullets_alowed.draw_input
-                    
+        self.bullets_alowed_button.draw_button()                  
 
     def _check_keydown_events(self, event):
         """Respond to keypresses."""
@@ -327,8 +321,9 @@ class AlienInvasion:
                 self.config_button.draw_button()
             else:
                 self._create_settings_button()
-                if self.button_state:
-                    self.button_state()
+                if self.label_state:
+                    self.label_state()
+                    self.input_state()
             if not self.first_play:
                 self.play_button.draw_button()
                     

@@ -12,17 +12,16 @@ class InputBox:
         # Set the dimensions and properties of the button.
         self.width, self.height = size
         self.font = pygame.font.SysFont(None, 48)
-        self.box_color = (0, 0, 0)
         self.action = action
 
         # Build the button's rect object and center it.
-        self.rect = pygame.Rect(0, 0, self.width, self.height)
-        self.rect.center = position
+        self.rect = pygame.Rect(0, 0, size[0], size[1])
+        self.rect.midleft = position
 
         # States variables
         self.active = False
-        self.color_active = (255, 255, 255)
-        self.color_inactive = (50, 50, 155)
+        self.color_active = (0, 0, 0)
+        self.color_inactive = (255, 255, 255)
         self.color = self.color_inactive
 
 
@@ -35,8 +34,7 @@ class InputBox:
 
     def _prep_msg(self, msg):
         """Turn msg into a rendered image and center text on the button."""
-        self.msg_image = self.font.render(msg, True, self.color,
-                self.box_color)
+        self.msg_image = self.font.render(msg, True, self.color)
         self.msg_image_rect = self.msg_image.get_rect()
         self.msg_image_rect.center = self.rect.center
 
@@ -63,5 +61,5 @@ class InputBox:
 
     def draw_input(self):
         """Draw blank inputbox and then draw message."""
-        pygame.draw.rect(self.screen, self.color, self.rect)
+        pygame.draw.rect(self.screen, self.color, self.rect, 2)
         self.screen.blit(self.msg_image, self.msg_image_rect)
