@@ -92,6 +92,8 @@ class AlienInvasion:
             # Move the ship to the right
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
+                if self.input_state:
+                    self.input_state.handle_key_event(event)
 
             # Stop moving
             elif event.type == pygame.KEYUP:
@@ -100,11 +102,8 @@ class AlienInvasion:
             elif event.type == pygame.MOUSEBUTTONDOWN and not self.game_active:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.label_state:
-                    input_box = [self.input_bullets_alowed, self.input_ship_speed,
-                        self.input_alien_speed]
-                    for item in input_box:
-                        item.handle_event(event)
-                        break
+                    self.input_state.handle_mouse_event(event)
+                        
                 self._check_collide(mouse_pos)
 
     def _check_collide(self, mouse_pos):
@@ -124,7 +123,7 @@ class AlienInvasion:
                     label = buttons[button][0]
                     input_box = buttons[button][1]
                     self.label_state = label.draw_label
-                    self.input_state = input_box.draw_input
+                    self.input_state = input_box
                     break
 
 
@@ -149,16 +148,16 @@ class AlienInvasion:
         """Open settings when the player clicks the button.."""
         if not self.game_active and not self.create_instance:
             self.alien_speed_button = Button(self, "Alien Speed", (0, 0, 0), (200, 100), (250, 100))
-            self.alien_label = Label(self, "Speed", (200, 200))
-            self.input_alien_speed =  InputBox(self, f"{self.settings.alien_speed}", (self.alien_label.msg_image_rect.right + 10, self.alien_label.msg_image_rect.centery), (180, 80))
+            self.alien_label = Label(self, "Speed:", (200, 200))
+            self.input_alien_speed =  InputBox(self, f"{self.settings.alien_speed}", (self.alien_label.msg_image_rect.right + 10, self.alien_label.msg_image_rect.centery), (65, 55))
 
             self.ship_speed_button = Button(self, "Ship Speed", (0, 0, 0), (200, 310), (250, 100))
-            self.ship_label = Label(self, "Speed", (200, 430))
-            self.input_ship_speed = InputBox(self, f"{self.settings.ship_speed}", (self.ship_label.msg_image_rect.right + 10, self.ship_label.msg_image_rect.centery), (180, 80))
+            self.ship_label = Label(self, "Speed:", (200, 430))
+            self.input_ship_speed = InputBox(self, f"{self.settings.ship_speed}", (self.ship_label.msg_image_rect.right + 10, self.ship_label.msg_image_rect.centery), (65, 55))
 
             self.bullets_alowed_button = Button(self, "Bullets Alowed", (0, 0, 0), (200, 560), (250, 100))  
-            self.bullets_label = Label(self, "Bullets", (200, 670))
-            self.input_bullets_alowed = InputBox(self, f"{self.settings.bullets_alowed}", (self.bullets_label.msg_image_rect.right + 10, self.bullets_label.msg_image_rect.centery), (180, 80))
+            self.bullets_label = Label(self, "Bullets:", (200, 670))
+            self.input_bullets_alowed = InputBox(self, f"{self.settings.bullets_alowed}", (self.bullets_label.msg_image_rect.right + 10, self.bullets_label.msg_image_rect.centery), (65, 55))
 
             self.create_instance = True
         self.config = True
@@ -323,7 +322,7 @@ class AlienInvasion:
                 self._create_settings_button()
                 if self.label_state:
                     self.label_state()
-                    self.input_state()
+                    self.input_state.draw_input()
             if not self.first_play:
                 self.play_button.draw_button()
                     

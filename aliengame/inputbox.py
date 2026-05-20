@@ -21,7 +21,7 @@ class InputBox:
         # States variables
         self.active = False
         self.color_active = (0, 0, 0)
-        self.color_inactive = (255, 255, 255)
+        self.color_inactive = (200, 180, 55)
         self.color = self.color_inactive
 
 
@@ -37,8 +37,9 @@ class InputBox:
         self.msg_image = self.font.render(msg, True, self.color)
         self.msg_image_rect = self.msg_image.get_rect()
         self.msg_image_rect.center = self.rect.center
+        self.width = max(self.msg_image.get_width(), self.width)
 
-    def handle_event(self, event):
+    def handle_mouse_event(self, event):
         """Checks click events on inputboxes"""
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos): # event.pos returns x, y pos
@@ -48,18 +49,19 @@ class InputBox:
 
             self.color = self.color_active if self.active else self.color_inactive
             self._prep_msg(self.msg)
+
+    def handle_key_event(self, event):
         if event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_BACKSPACE:
                     self.msg = self.msg[:-1]
                 elif event.unicode:
-                    self.msg += event.unicode
+                    if event.unicode.isdigit() or (event.unicode == "." and self.msg[-1] != "."):
+                        self.msg += event.unicode
                 # Font and state
                 self._prep_msg(self.msg)
 
-        
 
     def draw_input(self):
         """Draw blank inputbox and then draw message."""
-        pygame.draw.rect(self.screen, self.color, self.rect, 2)
         self.screen.blit(self.msg_image, self.msg_image_rect)
