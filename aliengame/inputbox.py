@@ -1,13 +1,16 @@
 import pygame.font
+from label import Label
+from settings import Settings
 
 class InputBox:
     """A class to represent input from the user
     to change game's settings
     """
-    def __init__(self, ai_game, msg, position, size, action=None):
+    def __init__(self, ai_game, msg, position, size, settings_obj, attr_name, action=None):
         """Initialize button attributes."""
         self.screen = ai_game.screen
         self.screen_rect = self.screen.get_rect()
+        self.settings = Settings()
 
         # Set the dimensions and properties of the button.
         self.width, self.height = size
@@ -27,17 +30,14 @@ class InputBox:
 
         # Dinamic msg
         self.msg = str(msg)
+        # Dinamic settings
+        self.settings_obj = settings_obj
+        self.attr_name = attr_name
 
 
         # The button message needs to be prepped only once.
-        self._prep_msg(self.msg)
+        self._prep_msg()
 
-    def _prep_msg(self, msg):
-        """Turn msg into a rendered image and center text on the button."""
-        self.msg_image = self.font.render(msg, True, self.color)
-        self.msg_image_rect = self.msg_image.get_rect()
-        self.msg_image_rect.center = self.rect.center
-        self.width = max(self.msg_image.get_width(), self.width)
 
     def handle_mouse_event(self, event):
         """Checks click events on inputboxes"""
@@ -46,21 +46,40 @@ class InputBox:
                 self.active = True
             else:
                 self.active = False
-
-            self.color = self.color_active if self.active else self.color_inactive
-            self._prep_msg(self.msg)
+            self._prep_msg()
 
     def handle_key_event(self, event):
         if event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_BACKSPACE:
-                    self.msg = self.msg[:-1]
+                    if len(self.msg) <= 1:
+                        self.msg = "0"
+                    else:
+                        self.msg = self.msg[:-1]
                 elif event.unicode:
-                    if event.unicode.isdigit() or (event.unicode == "." and self.msg[-1] != "."):
-                        self.msg += event.unicode
-                # Font and state
-                self._prep_msg(self.msg)
+                    if event.unicode.isdigit() or (event.unicode == "." and "." not in self.msg):
+                        if self.msg[0] == "0":
+                            self.msg = event.unicode
+                        else:
+                            self.msg += event.unicode
+                if event.key == pygame.K_RETURN:
+                    if not self.msg:
+                        self.msg = "0"
+                    setattr(self.settings_obj ,self.attr_name , float(self.msg))
+                    self.active = False
 
+            # Font and state
+            self._prep_msg()
+
+
+    def _prep_msg(self):
+        """Turn msg into a rendered image and center text on the button."""
+        self.color = self.color_active if self.active else self.color_inactive
+
+        self.msg_image = self.font.render(self.msg, True, self.color)
+        self.msg_image_rect = self.msg_image.get_rect()
+        self.msg_image_rect.midleft = self.rect.midleft
+        self.rect.width = max(self.msg_image.get_width(), self.width)
 
     def draw_input(self):
         """Draw blank inputbox and then draw message."""

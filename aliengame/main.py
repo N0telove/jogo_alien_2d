@@ -68,6 +68,9 @@ class AlienInvasion:
         self.label_state = None
         self.input_state = None
 
+        # The key continues to work while pressed down
+        pygame.key.set_repeat(500, 50)
+
 
 
 
@@ -149,15 +152,15 @@ class AlienInvasion:
         if not self.game_active and not self.create_instance:
             self.alien_speed_button = Button(self, "Alien Speed", (0, 0, 0), (200, 100), (250, 100))
             self.alien_label = Label(self, "Speed:", (200, 200))
-            self.input_alien_speed =  InputBox(self, f"{self.settings.alien_speed}", (self.alien_label.msg_image_rect.right + 10, self.alien_label.msg_image_rect.centery), (65, 55))
+            self.input_alien_speed =  InputBox(self, f"{self.settings.alien_speed}", (self.alien_label.msg_image_rect.right + 10, self.alien_label.msg_image_rect.centery), (65, 55), self.settings, "alien_speed")
 
             self.ship_speed_button = Button(self, "Ship Speed", (0, 0, 0), (200, 310), (250, 100))
             self.ship_label = Label(self, "Speed:", (200, 430))
-            self.input_ship_speed = InputBox(self, f"{self.settings.ship_speed}", (self.ship_label.msg_image_rect.right + 10, self.ship_label.msg_image_rect.centery), (65, 55))
+            self.input_ship_speed = InputBox(self, f"{self.settings.ship_speed}", (self.ship_label.msg_image_rect.right + 10, self.ship_label.msg_image_rect.centery), (65, 55), self.settings, "ship_speed")
 
             self.bullets_alowed_button = Button(self, "Bullets Alowed", (0, 0, 0), (200, 560), (250, 100))  
             self.bullets_label = Label(self, "Bullets:", (200, 670))
-            self.input_bullets_alowed = InputBox(self, f"{self.settings.bullets_alowed}", (self.bullets_label.msg_image_rect.right + 10, self.bullets_label.msg_image_rect.centery), (65, 55))
+            self.input_bullets_alowed = InputBox(self, f"{self.settings.bullets_alowed}", (self.bullets_label.msg_image_rect.right + 10, self.bullets_label.msg_image_rect.centery), (65, 55), self.settings, "bullets_alowed")
 
             self.create_instance = True
         self.config = True
