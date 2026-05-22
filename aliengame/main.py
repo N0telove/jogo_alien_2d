@@ -5,6 +5,7 @@ import pygame
 
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import Scoreboard
 from button import Button
 from inputbox import InputBox
 from label import Label
@@ -44,7 +45,9 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
 
         # Create an instance to store game statistics.
+        # and create a scoreboard.
         self.stats = GameStats(self)
+        self.scoreboard = Scoreboard(self)
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -147,6 +150,10 @@ class AlienInvasion:
             # Hide the mouse cursor.
             pygame.mouse.set_visible(False)
 
+            # Update the game score and level
+            self.scoreboard.prep_score()
+            self.scoreboard.prep_level()
+
     def _settings_button(self):
         """Open settings when the player clicks the button.."""
         if not self.game_active and not self.create_instance:
@@ -217,11 +224,22 @@ class AlienInvasion:
             self.bullets, self.aliens, True, True
         )
         
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.scoreboard.prep_score()
+            self.scoreboard.check_high_score()
+
+
         if not self.aliens:
             # Destroy existing bullets and create new fleet.
             self.bullets.empty()
             self._create_fleet()
             self.settings.increase_speed()
+
+            # Increase level.
+            self.stats.level += 1
+            self.scoreboard.prep_level()
 
 
     def _update_aliens(self):
@@ -317,11 +335,14 @@ class AlienInvasion:
         self.ship.blitme()
         self.aliens.draw(self.screen)
 
+        # Draw the score information
+        self.scoreboard.show_score()
+
         if not self.game_active:
             pygame.mouse.set_visible(True)
             if not self.config:
                 self.config_button.draw_button()
-            else:
+            elif self.config:
                 self._create_settings_button()
                 if self.label_state:
                     self.label_state()
