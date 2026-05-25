@@ -1,6 +1,9 @@
+import json
 import pygame.font
+
 from label import Label
 from settings import Settings
+
 
 class InputBox:
     """A class to represent input from the user
@@ -46,6 +49,8 @@ class InputBox:
                 self.active = True
             else:
                 self.active = False
+                self.save_config()
+
             self._prep_msg()
 
     def handle_key_event(self, event):
@@ -65,11 +70,21 @@ class InputBox:
                 if event.key == pygame.K_RETURN:
                     if not self.msg:
                         self.msg = "0"
-                    setattr(self.settings_obj ,self.attr_name , float(self.msg))
+                    self.save_config()
+
                     self.active = False
 
             # Font and state
             self._prep_msg()
+
+    def save_config(self):
+        setattr(self.settings_obj ,self.attr_name , float(self.msg))
+        with open("aliengame/json/settings.json", "r") as file:
+            data = json.load(file)
+
+        with open("aliengame/json/settings.json", "w") as file:
+            data[self.attr_name] = float(self.msg)
+            json.dump(data, file)
 
 
     def _prep_msg(self):

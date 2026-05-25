@@ -151,9 +151,7 @@ class AlienInvasion:
             pygame.mouse.set_visible(False)
 
             # Update the game score and level
-            self.scoreboard.prep_score()
-            self.scoreboard.prep_level()
-            self.scoreboard.prep_ships()
+            self.scoreboard.prep_images()
 
     def _settings_button(self):
         """Open settings when the player clicks the button.."""
@@ -233,15 +231,17 @@ class AlienInvasion:
 
 
         if not self.aliens:
-            # Destroy existing bullets and create new fleet.
-            self.bullets.empty()
-            self._create_fleet()
-            self.settings.increase_speed()
+            self._new_level()
 
-            # Increase level.
-            self.stats.level += 1
-            self.scoreboard.prep_level()
+    def _new_level(self):
+        # Destroy existing bullets and create new fleet.
+        self.bullets.empty()
+        self._create_fleet()
+        self.settings.increase_speed()
 
+        # Increase level.
+        self.stats.level += 1
+        self.scoreboard.prep_level()
 
     def _update_aliens(self):
         """Check if the fleet is at an edge, then Update positions"""

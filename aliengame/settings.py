@@ -1,3 +1,5 @@
+import json
+
 class Settings:
     """A classe to store all setings for Alien Invasion."""
     
@@ -29,16 +31,15 @@ class Settings:
 
     def _initialize_dynamic_settings(self):
         """Initialize settings that change throughout the game."""
-        self.ship_speed = 3.5
+        self.ship_speed, self.alien_speed, self.bullets_alowed  = self._load_settings()
         self.bullet_speed = 4.0
-        self.alien_speed = 5.5
-        self.bullets_alowed = 7
 
         # fleet_direction of 1 represents right; -1 represents left.
         self.fleet_direction = 1
 
         # Scoring settings
         self.alien_points = 50
+    
 
     def increase_speed(self):
         """Increase speed settings and alien point values."""
@@ -47,3 +48,9 @@ class Settings:
         self.alien_speed *= self.speedup_scale
 
         self.alien_points = int(self.alien_points * self.score_scale)
+    
+    
+    def _load_settings(self):
+        with open("aliengame/json/settings.json") as file:
+            data = json.load(file)
+            return data["ship_speed"], data["alien_speed"], data["bullets_alowed"]
