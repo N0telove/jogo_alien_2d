@@ -13,7 +13,7 @@ class InputBox:
         """Initialize button attributes."""
         self.screen = ai_game.screen
         self.screen_rect = self.screen.get_rect()
-        self.settings = Settings()
+        self.settings = ai_game.settings
 
         # Set the dimensions and properties of the button.
         self.width, self.height = size
@@ -31,10 +31,8 @@ class InputBox:
         self.color = self.color_inactive
 
 
-        # Dinamic msg
+        # Dinamic msg and setting
         self.msg = str(msg)
-        # Dinamic settings
-        self.settings_obj = settings_obj
         self.attr_name = attr_name
 
 
@@ -49,7 +47,7 @@ class InputBox:
                 self.active = True
             else:
                 self.active = False
-                self.save_config()
+                self.settings.save_config(self.attr_name, self.msg)
 
             self._prep_msg()
 
@@ -70,21 +68,12 @@ class InputBox:
                 if event.key == pygame.K_RETURN:
                     if not self.msg:
                         self.msg = "0"
-                    self.save_config()
+                    self.settings.save_config(self.attr_name, self.msg)
 
                     self.active = False
 
             # Font and state
             self._prep_msg()
-
-    def save_config(self):
-        setattr(self.settings_obj ,self.attr_name , float(self.msg))
-        with open("aliengame/json/settings.json", "r") as file:
-            data = json.load(file)
-
-        with open("aliengame/json/settings.json", "w") as file:
-            data[self.attr_name] = float(self.msg)
-            json.dump(data, file)
 
 
     def _prep_msg(self):

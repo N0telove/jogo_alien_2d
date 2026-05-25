@@ -54,3 +54,13 @@ class Settings:
         with open("aliengame/json/settings.json") as file:
             data = json.load(file)
             return data["ship_speed"], data["alien_speed"], data["bullets_alowed"]
+        
+
+    def save_config(self, attr_name, msg):
+        setattr(self, attr_name, float(msg))
+        with open("aliengame/json/settings.json", "r") as file:
+            data = json.load(file)
+
+        with open("aliengame/json/settings.json", "w") as file:
+            data[attr_name] = float(msg)
+            json.dump(data, file)

@@ -126,12 +126,12 @@ class AlienInvasion:
                     self.bullets_alowed_button: [self.bullets_label, self.input_bullets_alowed]}
             for button in buttons.keys():
                 if button.rect.collidepoint(mouse_pos):
-                    label = buttons[button][0]
-                    input_box = buttons[button][1]
-                    self.label_state = label.draw_label
-                    self.input_state = input_box
+                    self._set_active_input(buttons[button][0], buttons[button][1])
                     break
 
+    def _set_active_input(self, label_state, input_state):
+        self.label_state = label_state.draw_label
+        self.input_state = input_state
 
     def _play_button(self):
         """Start a new game when the player clicks Play."""
