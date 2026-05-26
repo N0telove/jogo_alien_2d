@@ -1,9 +1,4 @@
-import json
 import pygame.font
-
-from label import Label
-from settings import Settings
-
 
 class InputBox:
     """A class to represent input from the user

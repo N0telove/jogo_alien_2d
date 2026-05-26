@@ -5,12 +5,12 @@ from random import randint
 import pygame
 
 from configuration import ScreenSettings
+from stats import Stats
+from counter_kill import CounterKill
 from zombie import Zombie
 from gun import Gun
 from ammo import Ammo
 from vampire import Vampire
-from stats import Stats
-from counter_kill import CounterKill
 from keys import Button
 
 class Game:
@@ -100,6 +100,9 @@ class Game:
             self._create_coven()
             self.zombie.position_zombie()
 
+            # Update the game score and level
+            self.counter.prep_images()
+
             # Hide the mouse cursor.
             pygame.mouse.set_visible(False)
 
@@ -158,13 +161,25 @@ class Game:
             self.ammos, self.vampires, True, True
         )
         if collisions:
-            self.settings.increase_speed()
-            self.stats.eliminate_sprites += 1
+            for zombie in collisions.values():
+                self.settings.increase_speed()
+                self.stats.eliminate_sprites += 1
+            self.counter.prep_kills()
+            self.counter.check_highest_kills()
+
 
         if not self.vampires:
             # Destroy existing ammos and create new coven.
-            self.ammos.empty()
-            self._create_coven()
+            self._new_level()
+
+    def _new_level(self):
+        self.ammos.empty()
+        self._create_coven()
+
+        # Increase level.
+        self.stats.level += 1
+        self.counter.prep_level()
+
 
     def _update_vampires(self):
         """Update positions of vampires and check collisions."""
@@ -233,11 +248,12 @@ class Game:
         """Respond to the zombie being bite by a vampire."""
         if self.stats.zombies_left > 0:
             
-            # Decrement zombies left.
+            # Decrement zombies left and update scoreboard.
             self.stats.zombies_left -= 1
+            self.counter.prep_life()
 
             # Get rid of any remaining ammo and vampires.
-            
+            self.ammos.empty()
             self.vampires.empty()
 
             # Create a new coven and position the new zombie.
@@ -245,7 +261,7 @@ class Game:
             self.zombie.position_zombie()
 
             # Update lives counter
-            self.counter.render_life()
+            self.counter.prep_life()
 
             # Restart the game's speed
             self.settings.initialize_dynamic_settings()
@@ -255,6 +271,7 @@ class Game:
             # Pause
             sleep(0.5)
         else:
+            self.stats.save_max_kills()
             self.game_active = False
             pygame.mouse.set_visible(True)
 
