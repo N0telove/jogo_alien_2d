@@ -161,7 +161,7 @@ class Game:
             self.ammos, self.vampires, True, True
         )
         if collisions:
-            for zombie in collisions.values():
+            for vampire in collisions.values():
                 self.settings.increase_speed()
                 self.stats.eliminate_sprites += 1
             self.counter.prep_kills()
